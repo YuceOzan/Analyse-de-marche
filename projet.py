@@ -12,10 +12,15 @@ links = []
 categories = soup.findAll("ul", class_="nav nav-list")
 
 for category in categories:
-    category_link = category.find('li').a.get('href')
-    link_base = "http://books.toscrape.com/"
-    full_link = link_base + category_link
-    print(full_link)
+    hrefs = category.find_all('a', href=True)
+    for href in hrefs:
+        links.append(href['href'])
+    for href in links:
+        link_base = "http://books.toscrape.com/"
+        full_link = link_base + href
+        print(full_link)
+
+
 
 """
 
