@@ -5,12 +5,11 @@ url = 'http://books.toscrape.com'
 r = requests.get(url)
 soup = BeautifulSoup(r.text, "html.parser")
 
-books = []
+
 
 links = []
-
+final_links = []
 categories = soup.findAll("ul", class_="nav nav-list")
-
 for category in categories:
     hrefs = category.find_all('a', href=True)
     for href in hrefs:
@@ -18,11 +17,54 @@ for category in categories:
     for href in links:
         link_base = "http://books.toscrape.com/"
         full_link = link_base + href
-        print(full_link)
+        final_links.append(full_link)
+
+
+books = []
+for link in final_links:
+    res = requests.get(link).text
+    book_soup = BeautifulSoup(res, "html.parser")
+    book_link = soup.find_all(class_="product_pod")
+    for product in book_link:
+        a = product.find('a')
+        link = a['href'].replace("../../..", "")
+        books.append("http://books.toscrape.com/" + link)
+
+articles = []
+for article in books:
+    items = requests.get(article).text
+    article_soup = BeautifulSoup(items, "html.parser")
+
+    upc = article_soup.find(class_="table table-striped").td.text.strip()
+    print(len(upc))
+
+ """
+        'title': soup.find('div', {'class', 'col-sm-6 product_main'}).find('h1').text,
+        'price_with_tax': soup.find('table', {'class': 'table table-striped'}).find_all('td')[3].text.replace('Â', ''),
+        'pricetax': soup.find('table', {'class': 'table table-striped'}).find_all('td')[2].text.replace('Â', ''),
+        'available': soup.find('table', {'class': 'table table-striped'}).find_all('td')[5].text,
+        'category': soup.find('ul', {'class', 'breadcrumb'}).find_all('a')[2].text,
+        'review': soup.find('table', {'class', 'table table-striped'}).find('td').text[-1],
+        'image': soup.find('div', {'class', 'item active'}).find('img')['src'].replace('../..', 'http://books.toscrape.com'),
+        'description': soup.select("article.product_page > p"),
 
 
 
-"""
+
+
+
+url2 = "http://books.toscrape.com/catalogue/category/books/travel_2/index.html"
+page = requests.get(url2)
+soup2 = BeautifulSoup(page.content, 'html.parser')
+
+books = []
+book_links = soup2.find_all("li", class_="col-xs-6 col-sm-4 col-md-3 col-lg-3")
+for book_link in book_links:
+    link2 = book_link.find("h3").a.get("href")
+    link = link2.replace("../../..", "http://books.toscrape.com/catalogue")
+    complete_link = link
+    books.append(complete_link)
+print(books)
 
 for product in products:
         a = product.find('a')
