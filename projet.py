@@ -5,7 +5,7 @@ url = 'http://books.toscrape.com'
 r = requests.get(url)
 soup = BeautifulSoup(r.text, "html.parser")
 
-
+all_books = []
 
 links = []
 final_links = []
@@ -35,10 +35,30 @@ for article in books:
     items = requests.get(article).text
     article_soup = BeautifulSoup(items, "html.parser")
 
-    upc = article_soup.find(class_="table table-striped").td.text.strip()
-    print(len(upc))
+    upc = article_soup.find(class_="table table-striped").td.text
 
- """
+    title = article_soup.find(class_="col-sm-6 product_main").h1.text
+    price_with_tax = article_soup.find(class_="table table-striped").find_all('td')[3].text.replace('Â£', '')
+    price_without_tax = article_soup.find(class_="table table-striped").find_all('td')[2].text.replace('Â£', '')
+    available = article_soup.find(class_="table table-striped").find_all('td')[5].text.replace('In stock (', '')
+    book_category = article_soup.find(class_="breadcrumb").find_all('a')[2].text
+    image = article_soup.find(class_="item active").find('img')['src'].replace("../..", "http://books.toscrape.com")
+    review = article_soup.find(class_="table table-striped").find('td').text[-1]
+    description = article_soup.select("article.product_page > p")
+
+    book = {"title": title, "price_including_tax": price_with_tax, "price_excluding_tax": price_without_tax,
+            "number_available": available, "product_description": description, "category": book_category,
+            "image_url": image, "review_rating": review}
+    all_books.append(book)
+
+print(all_books)
+
+
+
+
+
+
+"""
         'title': soup.find('div', {'class', 'col-sm-6 product_main'}).find('h1').text,
         'price_with_tax': soup.find('table', {'class': 'table table-striped'}).find_all('td')[3].text.replace('Â', ''),
         'pricetax': soup.find('table', {'class': 'table table-striped'}).find_all('td')[2].text.replace('Â', ''),
