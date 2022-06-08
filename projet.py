@@ -23,28 +23,27 @@ books = []
 for link in new_links:
     r2 = requests.get(link).text
     book_soup = BeautifulSoup(r2, "html.parser")
-    print("categorie: " + link)
+    #print("categorie: " + link)
     nextpage = True
     while nextpage:
         book_link = book_soup.find_all(class_="product_pod")
         for product in book_link:
             a = product.find('a')
             full_link = a['href'].replace("../../..", "")
-            print("livre: " + full_link)
+            #print("livre: " + full_link)
             books.append("http://books.toscrape.com/catalogue" + full_link)
-        next_url = None
         if book_soup.find('li', class_='next') is None:
             nextpage = False
             page += 1
-            print("pas de page suivante")
+            #print("pas de page suivante")
         else:
-            next_url = book_soup.find(class_="next")
-            print(next_url)
-            r4 = requests.get(next_url).text
+            next_page = book_soup.find(class_="next")
+            print(next_page)
+            """   r4 = requests.get(next_url).text
             book_soup = BeautifulSoup(r4, 'html.parser')
     #créer csv
 
-"""
+
 articles = []
 for link in books:
     r3 = requests.get(link).text
