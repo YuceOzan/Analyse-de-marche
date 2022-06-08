@@ -1,11 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
 
+project = []
+
 url = 'http://books.toscrape.com'
 r = requests.get(url)
 soup = BeautifulSoup(r.text, "html.parser")
-
-project = []
 
 links = []
 categories = soup.findAll("ul", class_="nav nav-list")
@@ -16,16 +16,35 @@ for category in categories:
 new_links = [element.replace("catalogue", "http://books.toscrape.com/catalogue") for element in links]
 del new_links[0]
 
+page = 0
 books = []
+
+
 for link in new_links:
     r2 = requests.get(link).text
     book_soup = BeautifulSoup(r2, "html.parser")
-    book_link = book_soup.find_all(class_="product_pod")
-    for product in book_link:
-        a = product.find('a')
-        link = a['href'].replace("../../..", "")
-        books.append("http://books.toscrape.com/catalogue" + link)
+    print("categorie: " + link)
+    nextpage = True
+    while nextpage:
+        book_link = book_soup.find_all(class_="product_pod")
+        for product in book_link:
+            a = product.find('a')
+            full_link = a['href'].replace("../../..", "")
+            print("livre: " + full_link)
+            books.append("http://books.toscrape.com/catalogue" + full_link)
+        next_url = None
+        if book_soup.find('li', class_='next') is None:
+            nextpage = False
+            page += 1
+            print("pas de page suivante")
+        else:
+            next_url = book_soup.find(class_="next")
+            print(next_url)
+            r4 = requests.get(next_url).text
+            book_soup = BeautifulSoup(r4, 'html.parser')
+    #créer csv
 
+"""
 articles = []
 for link in books:
     r3 = requests.get(link).text
@@ -39,8 +58,9 @@ for link in books:
                                                                                                '').replace(')', '')
     book_category = article_soup.find(class_="breadcrumb").find_all('a')[2].text
     image = article_soup.find(class_="item active").find('img')['src'].replace("../..", "http://books.toscrape.com")
-    description = article_soup.find(class_="product_page").find_all('p')[3].text.replace("â", '"')\
-        .replace("â", '"').replace("â", "'").replace("â", "—").replace("â¢Â", "•").replace("Â", " ").replace("â¢", "•")
+    description = article_soup.find(class_="product_page").find_all('p')[3].text.replace("â", '"') \
+        .replace("â", '"').replace("â", "'").replace("â", "—").replace("â¢Â", "•").replace("Â", " ").replace(
+        "â¢", "•")
     review = article_soup.find(class_="table table-striped").find('td').text[6]
     # review star is needed?
 
@@ -50,7 +70,7 @@ for link in books:
     project.append(book)
 print(project)
 
-"""
+
 with open('urls.csv', 'w') as file:
     for link in links:
         file.write(link + '\n')
@@ -61,6 +81,4 @@ url = 'http://books.toscrape.com/catalogue/unicorn-tracks_951/index.html'
 response = requests.get(url)
 soup = BeautifulSoup(response.content, 'html.parser')
 
-
-while t
 """
