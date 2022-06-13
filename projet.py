@@ -16,33 +16,31 @@ for category in categories:
 new_links = [element.replace("catalogue", "http://books.toscrape.com/catalogue") for element in links]
 del new_links[0]
 
-page = 0
 books = []
-
 
 for link in new_links:
     r2 = requests.get(link).text
     book_soup = BeautifulSoup(r2, "html.parser")
-    #print("categorie: " + link)
+    print("categorie: " + link)
+    pages = 0
     nextpage = True
     while nextpage:
         book_link = book_soup.find_all(class_="product_pod")
         for product in book_link:
             a = product.find('a')
-            full_link = a['href'].replace("../../..", "")
-            #print("livre: " + full_link)
-            books.append("http://books.toscrape.com/catalogue" + full_link)
+            full_link = a['href'].replace("../../..", "http://books.toscrape.com/catalogue")
+            print("livre: " + full_link)
         if book_soup.find('li', class_='next') is None:
             nextpage = False
-            page += 1
-            #print("pas de page suivante")
+            print("pas de page suivante")
         else:
-            next_page = book_soup.find(class_="next")
-            print(next_page)
-            """   r4 = requests.get(next_url).text
+            next_page = book_soup.select_one('li.next>a').get('href')
+            index = link.replace('/index.html', '')
+            pg = next_page
+            real_url = f"{index}/{pg}"
+            print("Page suivante: " + real_url)
+            r4 = requests.get(real_url).text
             book_soup = BeautifulSoup(r4, 'html.parser')
-    #créer csv
-
 
 articles = []
 for link in books:
@@ -61,14 +59,13 @@ for link in books:
         .replace("â", '"').replace("â", "'").replace("â", "—").replace("â¢Â", "•").replace("Â", " ").replace(
         "â¢", "•")
     review = article_soup.find(class_="table table-striped").find('td').text[6]
-    # review star is needed?
+
 
     book = {"title": title, "price_including_tax(£)": price_with_tax, "price_excluding_tax(£)": price_without_tax,
             "number_available": available, "product_description": description, "category": book_category,
             "image_url": image, "review_rating": review}
     project.append(book)
 print(project)
-
 
 with open('urls.csv', 'w') as file:
     for link in links:
@@ -79,5 +76,3 @@ with open('urls.csv', 'r') as file:
 url = 'http://books.toscrape.com/catalogue/unicorn-tracks_951/index.html'
 response = requests.get(url)
 soup = BeautifulSoup(response.content, 'html.parser')
-
-"""
